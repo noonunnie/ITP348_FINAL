@@ -1,5 +1,6 @@
 ### **Postal Puppy Firmware**  
 This firmware project was created using **Particle Developer Tools** and is compatible with all **Particle Devices**.  
+Code was written from from Rob Parke's ITP348 website examples: https://reparke.github.io/ITP348-Physical-Computing/schedule.html
 
 ---
 
