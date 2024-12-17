@@ -1,100 +1,155 @@
-# postal puppy
+### **Postal Puppy Firmware**  
+This firmware project was created using **Particle Developer Tools** and is compatible with all **Particle Devices**.  
 
-This firmware project was created using [Particle Developer Tools](https://www.particle.io/developer-tools/) and is compatible with all [Particle Devices](https://www.particle.io/devices/).
+---
 
-Feel free to replace this README.md file with your own content, or keep it for reference.
+### **Table of Contents**  
+1. [Introduction](#introduction)  
+2. [Prerequisites To Use This Repository](#prerequisites-to-use-this-repository)  
+3. [Getting Started](#getting-started)  
+4. [Postal Puppy Firmware Overview](#postal-puppy-firmware-overview)  
+    - [Logging](#logging)  
+    - [Setup and Loop](#setup-and-loop)  
+    - [Delays and Timing](#delays-and-timing)  
+5. [Testing and Debugging](#testing-and-debugging)  
+6. [GitHub Actions (CI/CD)](#github-actions-cicd)  
+7. [OTA Updates](#ota-updates)  
+8. [Support and Feedback](#support-and-feedback)  
+9. [Version](#version)  
 
-## Table of Contents
-- [Introduction](#introduction)
-- [Prerequisites To Use This Template](#prerequisites-to-use-this-repository)
-- [Getting Started](#getting-started)
-- [Particle Firmware At A Glance](#particle-firmware-at-a-glance)
-  - [Logging](#logging)
-  - [Setup and Loop](#setup-and-loop)
-  - [Delays and Timing](#delays-and-timing)
-  - [Testing and Debugging](#testing-and-debugging)
-  - [GitHub Actions (CI/CD)](#github-actions-cicd)
-  - [OTA](#ota)
-- [Support and Feedback](#support-and-feedback)
-- [Version](#version)
+---
 
-## Introduction
+### **Introduction**  
+The **Postal Puppy** firmware powers a gift delivery system that assigns recipients, locks a gift box, and grants access through RFID scanning. This repository serves as the starting point for customizing or enhancing the firmware.  
 
-For an in-depth understanding of this project template, please refer to our [documentation](https://docs.particle.io/firmware/best-practices/firmware-template/).
+---
 
-## Prerequisites To Use This Repository
+### **Prerequisites To Use This Repository**  
+To build and deploy the firmware, ensure you have:  
+- A **Particle Device** (e.g., Photon, Argon, or Boron).  
+- Windows/Mac/Linux for development and flashing the device.  
+- Particle Developer Tools installed:  
+   - [Particle CLI](https://docs.particle.io/tutorials/device-os/cli/)  
+   - [Visual Studio Code with the Particle Workbench plugin](https://docs.particle.io/workbench/).  
+- USB connection for flashing and debugging.  
+- (Optional) A cup of tea ☕ for stress-free development.  
 
-To use this software/firmware on a device, you'll need:
+---
 
-- A [Particle Device](https://www.particle.io/devices/).
-- Windows/Mac/Linux for building the software and flashing it to a device.
-- [Particle Development Tools](https://docs.particle.io/getting-started/developer-tools/developer-tools/) installed and set up on your computer.
-- Optionally, a nice cup of tea (and perhaps a biscuit).
+### **Getting Started**  
+1. **Device Setup:**  
+   - Run the Particle device setup process to ensure up-to-date firmware.  
 
-## Getting Started
+2. **Open Project:**  
+   - Open this repository in Visual Studio Code:  
+     **File -> Open Folder**.  
 
-1. While not essential, we recommend running the [device setup process](https://setup.particle.io/) on your Particle device first. This ensures your device's firmware is up-to-date and you have a solid baseline to start from.
+3. **Build and Flash:**  
+   - Connect the Particle device to your computer via USB.  
+   - Compile and flash the firmware:  
+     - **Visual Studio Code:** Run the "Particle: Cloud Flash" or "Particle: Local Flash" command.  
+     - **CLI:** Execute:  
+       ```bash
+       particle flash <device_name> <firmware_file>
+       ```  
 
-2. If you haven't already, open this project in Visual Studio Code (File -> Open Folder). Then [compile and flash](https://docs.particle.io/getting-started/developer-tools/workbench/#cloud-build-and-flash) your device. Ensure your device's USB port is connected to your computer.
+4. **Monitor Logs:**  
+   - View live logging output:  
+     - **VS Code:** Command Palette → "Particle: Serial Monitor".  
+     - **CLI:**  
+       ```bash
+       particle serial monitor --follow
+       ```  
 
-3. Verify the device's operation by monitoring its logging output:
-    - In Visual Studio Code with the Particle Plugin, open the [command palette](https://docs.particle.io/getting-started/developer-tools/workbench/#particle-commands) and choose "Particle: Serial Monitor".
-    - Or, using the Particle CLI, execute:
-    ```
-    particle serial monitor --follow
-    ```
+5. **Particle Cloud Integration:**  
+   - Uncomment the relevant code in your `src` folder to enable event publishing.  
+   - Monitor real-time events on [Particle Console](https://console.particle.io).  
 
-4. Uncomment the code at the bottom of the cpp file in your src directory to publish to the Particle Cloud! Login to console.particle.io to view your devices events in real time.
+---
 
-5. Customize this project! For firmware details, see [Particle firmware](https://docs.particle.io/reference/device-os/api/introduction/getting-started/). For information on the project's directory structure, visit [this link](https://docs.particle.io/firmware/best-practices/firmware-template/#project-overview).
+### **Postal Puppy Firmware Overview**  
 
-## Particle Firmware At A Glance
+#### **Logging**  
+The firmware includes a logging library for easy debugging. Example:  
+```cpp
+Log.info("Postal Puppy started");
+Log.warn("RFID scan failed");
+Log.error("System error detected");
+```  
+You can adjust log levels to filter messages for testing or deployment.  
 
-### Logging
+---
 
-The firmware includes a [logging library](https://docs.particle.io/reference/device-os/api/logging/logger-class/). You can display messages at different levels and filter them:
+#### **Setup and Loop**  
+The firmware runs using standard Particle framework functions:  
+- **setup():** Initializes components (OLED, RFID scanner, LEDs, etc.).  
+- **loop():** Main logic for box locking, RFID validation, and access control.  
 
-```
-Log.trace("This is trace message");
-Log.info("This is info message");
-Log.warn("This is warn message");
-Log.error("This is error message");
-```
+**Example Workflow:**  
+1. Initialize components in `setup()`.  
+2. Monitor button inputs and scan RFID cards in `loop()`.  
+3. Update OLED messages and LEDs based on events.  
 
-### Setup and Loop
+---
 
-Particle projects originate from the Wiring/Processing framework, which is based on C++. Typically, one-time setup functions are placed in `setup()`, and the main application runs from the `loop()` function.
+#### **Delays and Timing**  
+Avoid using `delay()` for better performance. Instead, use non-blocking techniques like timers.  
+**Example:**  
+```cpp
+unsigned long previousMillis = 0;
+const long interval = 1000;
 
-For advanced scenarios, explore our [threading support](https://docs.particle.io/firmware/software-design/threading-explainer/).
+if (millis() - previousMillis >= interval) {
+    previousMillis = millis();
+    Log.info("1 second passed");
+}
+```  
 
-### Delays and Timing
+---
 
-By default, the setup() and loop() functions are blocking whilst they run, meaning that if you put in a delay, your entire application will wait for that delay to finish before anything else can run. 
+### **Testing and Debugging**  
+For testing:  
+- Use the **Particle CLI** to monitor logs.  
+- Flash in **SAFE MODE** to bypass faulty firmware.  
+- Debug hardware connections (buttons, RFID, LEDs) for expected behavior.  
 
-For techniques that allow you to run multiple tasks in parallel without creating threads, checkout the code example [here](https://docs.particle.io/firmware/best-practices/firmware-template/).
+**Tools:**  
+- Visual Studio Code Debugger  
+- Particle CLI Serial Monitor  
 
-(Note: Although using `delay()` isn't recommended for best practices, it's acceptable for testing.)
+---
 
-### Testing and Debugging
+### **GitHub Actions (CI/CD)**  
+This repository includes a GitHub Actions YAML file that automates:  
+- **Firmware compilation** upon each push to the repository.  
+- Integration with Particle Cloud.  
 
-For firmware testing and debugging guidance, check [this documentation](https://docs.particle.io/troubleshooting/guides/build-tools-troubleshooting/debugging-firmware-builds/).
+You can customize the YAML file for additional build steps or notifications.  
 
-### GitHub Actions (CI/CD)
+---
 
-This project provides a YAML file for GitHub, automating firmware compilation whenever changes are pushed. More details on [Particle GitHub Actions](https://docs.particle.io/firmware/best-practices/github-actions/) are available.
+### **OTA Updates**  
+**Particle OTA (Over-the-Air)** enables remote firmware updates:  
+- **Cloud Flash Command:**  
+   ```bash
+   particle flash <device_name>
+   ```  
+- Monitor the update process in Particle Console.  
 
-### OTA
+**Advanced Features:**  
+- Support for binary assets like images, configurations, or microcontroller firmware.  
 
-To learn how to utilize Particle's OTA service for device updates, consult [this documentation](https://docs.particle.io/getting-started/cloud/ota-updates/).
+---
 
-Test OTA with the 'Particle: Cloud Flash' command in Visual Studio Code or the CLI command 'particle flash'!
+### **Support and Feedback**  
+Need help or want to provide feedback?  
+- Join the [Particle Community](https://community.particle.io).  
+- Explore Particle Documentation for advanced features.  
 
-This firmware supports binary assets in OTA packages, allowing the inclusion of audio, images, configurations, and external microcontroller firmware. More details are [here](https://docs.particle.io/reference/device-os/api/asset-ota/asset-ota/).
+---
 
-## Support and Feedback
+### **Version**  
+**Postal Puppy Firmware** - Version **1.0.0**  
 
-For support or feedback on this template or any Particle products, please join our [community](https://community.particle.io)!
-
-## Version
-
-Template version 1.0.2
+---  
+Let the Postal Puppy deliver joy! 🐾✨  
